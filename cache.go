@@ -14,7 +14,7 @@ type Content struct {
 }
 
 type Cache struct {
-	cache        map[string]*Entry
+	cache        map[string]*Content
 	mutex        *sync.RWMutex
 	expiryLength time.Duration
 }
@@ -33,9 +33,9 @@ func (c *Cache) get(key string) []byte {
 
 func (c *Cache) put(key string, data []byte) {
 	c.mutex.Lock()
-	c.cache[key] = &Entry{
+	c.cache[key] = &Content{
 		Content: data,
-		Expire:  time.Now().Add(dur),
+		Expire:  time.Now().Add(c.expiryLength),
 	}
 	c.mutex.Unlock()
 	return
@@ -43,7 +43,7 @@ func (c *Cache) put(key string, data []byte) {
 
 func (c *Cache) clear(key string) {
 	c.mutex.Lock()
-	c.cache[key] = &Entry{
+	c.cache[key] = &Content{
 		Content: nil,
 		Expire:  time.Now(),
 	}
@@ -52,11 +52,12 @@ func (c *Cache) clear(key string) {
 }
 
 //Application Level Static Cache & expires every 4 hours by default
-var StaticCache = newStaticCache(4 * time.Hour)
+var dur time.Duration = 4 * time.Hour
+var StaticCache = newStaticCache(dur)
 
-func newStaticCache(dur time.Duration) {
+func newStaticCache(dur time.Duration) *Cache {
 	return &Cache{
-		cache:        map[string]*Entry{},
+		cache:        map[string]*Content{},
 		mutex:        new(sync.RWMutex),
 		expiryLength: dur,
 	}
