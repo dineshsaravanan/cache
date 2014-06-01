@@ -44,7 +44,7 @@ func (c *Cache) put(key string, data []byte) {
 func (c *Cache) clear(key string) {
 	c.mutex.Lock()
 	c.cache[key] = &Entry{
-		Content: data,
+		Content: nil,
 		Expire: time.Now(),
 	}
 	c.mutex.Unlock()
